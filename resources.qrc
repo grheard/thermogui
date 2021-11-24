@@ -1,0 +1,13 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/">
+  <file>qml/main.qml</file>
+  <file>qml/Thermostat.qml</file>
+  <file>qml/Sidebar.qml</file>
+  <file>content/wifi-status/network-wireless-signal-none-symbolic.png</file>
+  <file>content/wifi-status/network-wireless-signal-weak-symbolic.png</file>
+  <file>content/wifi-status/network-wireless-signal-ok-symbolic.png</file>
+  <file>content/wifi-status/network-wireless-signal-good-symbolic.png</file>
+  <file>content/wifi-status/network-wireless-signal-excellent-symbolic.png</file>
+  <file>content/system-settings-symbolic.png</file>
+</qresource>
+</RCC>
