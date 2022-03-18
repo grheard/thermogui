@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
 
     Logger::Instance()->write(0,LogEntry::Info,__PRETTY_FUNCTION__,"Starting.");
 
+    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
+    
     QGuiApplication app(argc, argv);
 
     Config::createInstance(&app);

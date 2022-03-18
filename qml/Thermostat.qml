@@ -5,24 +5,18 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.2
 
 
-Window {
+Rectangle {
     id: thermostat
-    //visible: true
-    width: 430
-    height: 320
-    color: "black" //"#00004d"
+    color: "black"
 
     Rectangle {
         x: 0
         y: 0
         width: parent.width - x
         height: parent.height - 125 - y
-        color: "black" //"#00004d"
-        // border.color: "white"
-        // border.width: 2
+        color: "black"
         radius: 5
 
         RowLayout {
@@ -57,7 +51,7 @@ Window {
 
                 Rectangle {
                     id: rectCool
-                    color: "black" //"#00004d"
+                    color: "black"
                     radius: 5
                     Layout.minimumWidth: 100
                     Layout.minimumHeight: 80
@@ -114,7 +108,7 @@ Window {
 
                 Rectangle {
                     id: rectHeat
-                    color: "black" //"#00004d"
+                    color: "black"
                     radius: 5
                     Layout.minimumWidth: 100
                     Layout.minimumHeight: 80
@@ -177,9 +171,7 @@ Window {
         y: parent.height - 125
         width: parent.width - x
         height: 125
-        color: "black" //"#00004d"
-        // border.color: "white"
-        // border.width: 2
+        color: "black"
         radius: 5
 
         RowLayout {
@@ -248,7 +240,7 @@ Window {
         y: 50
 
         background: Rectangle {
-            color: "black" //"#00004d"
+            color: "black"
             border.color: "white"
             border.width: 2
             radius: 5
@@ -343,8 +335,5 @@ Window {
         onSigSettingsMode: handleMode(value)
         onSigSettingsFan: handleFan(value)
         onSigFan: handleFan(value)
-
-        onSigInService: thermostat.visible = true
-        onSigOutOfService: thermostat.visible = false
     }
 }

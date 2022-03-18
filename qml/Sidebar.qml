@@ -5,52 +5,42 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.2
 
 
-Window {
+Rectangle {
     id: sidebar
-    visible: true
-    x: 430
-    y: 0
-    width: 50
-    height: 320
-    color: "black" //"#00004d"
 
+    color: 'black'
 
-    Rectangle {
+    Image {
+        id: wifi
+        visible: true
+        width: 44
+        height: 44
         anchors {
-            fill: parent
-            centerIn: parent
+            top: parent.top
+            horizontalCenter: parent.horizontalCenter
         }
-        color: "black" //"#00004d"
-        // border.color: "white"
-        // border.width: 2
-        // radius: 5
+        source: "qrc:/content/wifi-status/network-wireless-signal-none-symbolic.png"
+    }
 
-        Image {
-            id: wifi
-            visible: true
-            width: 44
-            height: 44
-            anchors {
-                top: parent.top
-                horizontalCenter: parent.horizontalCenter
-            }
+    Image {
+        id: settings
+        visible: true
+        width: 44
+        height: 44
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
         }
-
-        Image {
-            id: settings
-            visible: true
-            width: 44
-            height: 44
-            anchors {
-                bottom: parent.bottom
-                horizontalCenter: parent.horizontalCenter
-            }
-            source: "qrc:/content/system-settings-symbolic.png"
+        source: "qrc:/content/system-settings-symbolic.png"
+        MouseArea {
+            anchors.fill: parent
+            onClicked: sidebar.settingsPressed()
         }
     }
+
+    signal settingsPressed()
 
     Connections {
         target: mcwpaif
