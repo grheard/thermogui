@@ -6,8 +6,8 @@ import QtQuick 2.7
 import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
-import QtQuick.VirtualKeyboard 2.1
-import QtQuick.VirtualKeyboard.Settings 2.1
+import QtQuick.VirtualKeyboard 2.4
+import QtQuick.VirtualKeyboard.Settings 2.2
 
 
 Window {
@@ -181,6 +181,45 @@ Window {
         onSettingsPressed: {
             if (settings.visible) stack.pop()
             else stack.push(settings)
+        }
+    }
+
+    property var keyboardLayout: inputPanel.keyboard.layout
+
+    function findChildByProperty(parent, propertyName, propertyValue, compareCb) {
+        var obj = null
+        if (parent === null)
+            return null
+        var children = parent.children
+        for (var i = 0; i < children.length; i++) {
+            obj = children[i]
+            if (obj.hasOwnProperty(propertyName)) {
+                if (compareCb !== null) {
+                    if (compareCb(obj[propertyName], propertyValue))
+                        break
+                } else if (obj[propertyName] === propertyValue) {
+                    break
+                }
+            }
+            obj = findChildByProperty(obj, propertyName, propertyValue, compareCb)
+            if (obj)
+                break
+        }
+        return obj
+    }
+
+    onKeyboardLayoutChanged: {
+        if (keyboardLayout !== '') {
+            var ChangeLanguageKey = findChildByProperty(inputPanel.keyboard, "objectName", "changeLanguageKey", null)
+            if (ChangeLanguageKey) {
+                ChangeLanguageKey.visible = false
+                ChangeLanguageKey.enabled = false
+            }
+            var emojiKey = findChildByProperty(inputPanel.keyboard, "text", ":-)", null)
+            if (emojiKey) {
+                emojiKey.visible = false
+                emojiKey.enabled = false
+            }
         }
     }
 }

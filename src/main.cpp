@@ -1,3 +1,6 @@
+/*
+ * Copyright 2021 grheard@gmail.com
+ */
 
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
@@ -22,7 +25,8 @@ int main(int argc, char *argv[])
     Logger::Instance()->write(0,LogEntry::Info,__PRETTY_FUNCTION__,"Starting.");
 
     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
-    
+    qputenv("QT_VIRTUALKEYBOARD_STYLE", QByteArray("myretro"));
+
     QGuiApplication app(argc, argv);
 
     Config::createInstance(&app);

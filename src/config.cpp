@@ -34,6 +34,7 @@ Config* Config::m_instance(0);
 
 Config::Config (QObject* parent)
     : QObject(parent)
+    , m_mqttDebug(0)
 {
     QCommandLineParser parser;
 
@@ -103,7 +104,7 @@ Config::Config (QObject* parent)
         QJsonValue mqttDebug(gui[CMqttDebug]);
         if (mqttDebug.isUndefined() || mqttDebug.toInt(-1) == -1)
         {
-            LogWarning("The '%s' object is missing or not an integer.",CMqttDebug.toStdString().c_str());
+            LogDebug("The '%s' object is missing or not an integer.",CMqttDebug.toStdString().c_str());
         }
         else
         {
