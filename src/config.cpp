@@ -93,7 +93,7 @@ Config::Config (QObject* parent)
     }
 
     QJsonObject gui(doc.object()[CGui].toObject());
-    if (common.isEmpty())
+    if (gui.isEmpty())
     {
         LogWarning("The '%s' object is either missing or empty.",CGui.toStdString().c_str());
     }

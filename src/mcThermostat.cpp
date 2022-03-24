@@ -33,7 +33,6 @@ const QString CCmdGetFan(QString::fromUtf8("get-fan"));
 const QString CCmdPutFan(QString::fromUtf8("put-fan"));
 
 const QString CKeyResult(QString::fromUtf8("result"));
-const QString CKeySetpoint(QString::fromUtf8("setpoint"));
 
 const QString CHeat(QString::fromUtf8("heat"));
 const QString CCool(QString::fromUtf8("cool"));
@@ -43,16 +42,11 @@ const QString CAuto(QString::fromUtf8("auto"));
 const QString COn(QString::fromUtf8("on"));
 
 
-const double CSetpointDelta(1.1112);
-
-
 MCThermostat::MCThermostat(QObject* parent)
     : QObject(parent)
     , propertyName(QString::fromUtf8("mcthermostat"))
     , m_inService(false)
     , m_topic(CTopicThermostat)
-    , m_settingHeat(0.0)
-    , m_settingCool(0.0)
 {
     QString topicRoot(Config::instance()->getTopicRoot());
     if (!topicRoot.isEmpty())
@@ -229,42 +223,32 @@ void MCThermostat::parseAction(const QJsonDocument& doc)
             emit sigSettingsMode(mode);
         }
 
-        QJsonObject setpoint(result.find(CKeySetpoint).value().toObject());
-        if (setpoint.isEmpty())
+        QJsonValue vHeat(result.find(CHeat).value());
+        if (!vHeat.isDouble())
         {
-            LogWarning("Cmd '%s' result key '%s' is invalid or missing.",cmd.toStdString().c_str(),CKeySetpoint.toStdString().c_str());
+            LogWarning("Cmd '%s' setpoint key '%s' is invalid or missing.",cmd.toStdString().c_str(),CHeat.toStdString().c_str());
         }
         else
         {
-            QJsonValue vHeat(setpoint.find(CHeat).value());
-            if (!vHeat.isDouble())
-            {
-                LogWarning("Cmd '%s' setpoint key '%s' is invalid or missing.",cmd.toStdString().c_str(),CHeat.toStdString().c_str());
-            }
-            else
-            {
-                m_settingHeat = vHeat.toDouble();
-                // TODO: perform temperature conversion
-                // thermostat operature in celcius.
-                QString heat(QString::fromUtf8("%1").arg(ConvertFromThermostatUnits(m_settingHeat),3,'f',0));
+            // TODO: perform temperature conversion
+            // thermostat operature in celcius.
+            QString heat(QString::fromUtf8("%1").arg(ConvertFromThermostatUnits(vHeat.toDouble()),3,'f',0));
 
-                emit sigSettingsHeat(heat.trimmed());
-            }
+            emit sigSettingsHeat(heat.trimmed());
+        }
 
-            QJsonValue vCool(setpoint.find(CCool).value());
-            if (!vCool.isDouble())
-            {
-                LogWarning("Cmd '%s' setpoint key '%s' is invalid or missing.",cmd.toStdString().c_str(),CCool.toStdString().c_str());
-            }
-            else
-            {
-                m_settingCool = vCool.toDouble();
-                // TODO: perform temperature conversion
-                // thermostat operature in celcius.
-                QString cool(QString::fromUtf8("%1").arg(ConvertFromThermostatUnits(m_settingCool),3,'f',0));
+        QJsonValue vCool(result.find(CCool).value());
+        if (!vCool.isDouble())
+        {
+            LogWarning("Cmd '%s' setpoint key '%s' is invalid or missing.",cmd.toStdString().c_str(),CCool.toStdString().c_str());
+        }
+        else
+        {
+            // TODO: perform temperature conversion
+            // thermostat operature in celcius.
+            QString cool(QString::fromUtf8("%1").arg(ConvertFromThermostatUnits(vCool.toDouble()),3,'f',0));
 
-                emit sigSettingsCool(cool.trimmed());
-            }
+            emit sigSettingsCool(cool.trimmed());
         }
     }
     else if (cmd == CCmdGetFan)
@@ -302,23 +286,19 @@ void MCThermostat::slotSettingsChange(const QString& setting, const int& value)
     // thermostat operature in celcius.
     double set(ConvertToThermostatUnits(value));
 
-    if (setting == CHeat)
-    {
-        m_settingHeat = set;
-        if ((m_settingHeat + CSetpointDelta) >= m_settingCool)
-        {
-            m_settingCool = m_settingHeat + CSetpointDelta;
-        }
-    }
-    else
-    {
-        m_settingCool = set;
-        if ((m_settingCool - CSetpointDelta) <= m_settingHeat)
-        {
-            m_settingHeat = m_settingCool - CSetpointDelta;
-        }
-    }
-    publishPutSettings();
+    QJsonObject setpoint;
+
+    setpoint.insert(setting,QJsonValue(set));
+
+    QJsonObject root;
+
+    root.insert(CKeyCmd,CCmdPutSettings);
+    root.insert(CKeyResult,QJsonValue(setpoint));
+
+    QJsonDocument doc;
+    doc.setObject(root);
+
+    publishPutSettings(doc.toJson(QJsonDocument::Compact));
 }
 
 
@@ -329,7 +309,19 @@ void MCThermostat::slotModeChange(const QString& mode)
     else if (mode == CCool) m_settingMode = CHeat;
     else if (mode == CHeat) m_settingMode = COff;
 
-    publishPutSettings();
+    QJsonObject setting;
+
+    setting.insert(CKeyMode,QJsonValue(m_settingMode));
+
+    QJsonObject root;
+
+    root.insert(CKeyCmd,CCmdPutSettings);
+    root.insert(CKeyResult,QJsonValue(setting));
+
+    QJsonDocument doc;
+    doc.setObject(root);
+
+    publishPutSettings(doc.toJson(QJsonDocument::Compact));
 }
 
 
@@ -340,31 +332,6 @@ void MCThermostat::slotFanChange(const QString& fan)
 
     publishPutFan();
 }
-
-
-QByteArray MCThermostat::assembleSettings()
-{
-    QJsonObject set;
-
-    set.insert(CHeat,QJsonValue(m_settingHeat));
-    set.insert(CCool,QJsonValue(m_settingCool));
-
-    QJsonObject result;
-
-    result.insert(CKeyMode,m_settingMode);
-    result.insert(CKeySetpoint,QJsonValue(set));
-
-    QJsonObject root;
-
-    root.insert(CKeyCmd,CCmdPutSettings);
-    root.insert(CKeyResult,QJsonValue(result));
-
-    QJsonDocument doc;
-    doc.setObject(root);
-
-    return doc.toJson(QJsonDocument::Compact);
-}
-
 
 QByteArray MCThermostat::assembleFan()
 {
@@ -384,9 +351,9 @@ QByteArray MCThermostat::assembleFan()
 }
 
 
-void MCThermostat::publishPutSettings()
+void MCThermostat::publishPutSettings(const QByteArray& payload)
 {
-    Mqtt::instance()->publish(QString::fromUtf8("%1/action").arg(m_topic),assembleSettings(),2);
+    Mqtt::instance()->publish(QString::fromUtf8("%1/action").arg(m_topic),payload,2);
 }
 
 

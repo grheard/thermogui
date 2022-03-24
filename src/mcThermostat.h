@@ -49,7 +49,7 @@ protected:
     void parseAction(const QJsonDocument& doc);
     QByteArray assembleSettings();
     QByteArray assembleFan();
-    void publishPutSettings();
+    void publishPutSettings(const QByteArray& payload);
     void publishGetSettings();
     void publishPutFan();
     void publishGetFan();
@@ -62,8 +62,6 @@ protected:
     QString m_topic;
 
     QString m_settingMode;
-    double m_settingHeat;
-    double m_settingCool;
 
     QString m_fan;
 };
